@@ -30,6 +30,7 @@
 #include <iterator>
 #include <memory>
 #include <regex>
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -682,6 +683,10 @@ change_menu:
 
       case Device::ENABLE_ADB:
         android::base::SetProperty("ro.adb.secure.recovery", "0");
+        android::base::SetProperty("sys.usb.config", "none");
+        android::base::WaitForProperty("sys.usb.state", "none", std::chrono::seconds(5));
+        android::base::SetProperty("sys.usb.config", "adb");
+        android::base::WaitForProperty("sys.usb.state", "adb", std::chrono::seconds(5));
         android::base::SetProperty("ctl.restart", "adbd");
         device->RemoveMenuItemForAction(Device::ENABLE_ADB);
         device->GoHome();
